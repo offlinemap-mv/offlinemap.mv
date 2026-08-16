@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Explorer Pro Gateway</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background: #0F172A; color: #E2E8F0; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+        .wrapper { width: 100%; max-width: 1000px; display: none; }
+        
+        #login-gate { background: #1E293B; border: 1px solid #334155; padding: 32px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 12px; font-size: 18px; border-radius: 8px; border: 1px solid #475569; background: #0F172A; color: white; text-align: center; tracking: 0.2em; margin: 18px 0; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 40px; }
+        .card { background: #1E293B; border: 1px solid #334155; padding: 24px; border-radius: 12px; }
+        .card h3 { font-size: 14px; text-transform: uppercase; color: #94A3B8; margin-bottom: 8px; }
+        .card .metric { font-size: 36px; font-weight: bold; color: #38BDF8; }
+        
+        table { width: 100%; border-collapse: collapse; background: #1E293B; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }
+        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #334155; }
+        th { background: #334155; color: white; font-size: 12px; text-transform: uppercase; }
+        
+        button { background: #0EA5E9; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0284C7; }
+        .action-btn { padding: 6px 12px; font-size: 11px; text-transform: uppercase; margin-right: 6px; border-radius: 4px; border: none; font-weight: bold; color: white; cursor: pointer; }
+        .grant-btn { background: #10B981; }
+        .grant-btn:hover { background: #059669; }
+        .revoke-btn { background: #EF4444; }
+        .revoke-btn:hover { background: #DC2626; }
+    </style>
+</head>
+<body>
+
+    <!-- 🔒 AUTHENTICATOR LOGIN GATE PROMPT -->
+    <div id="login-gate">
+        <h2>🔒 Security Code Required</h2>
+        <p style="color:#94A3B8; font-size:13px; margin-top:6px;">Enter the 6-digit confirmation code from your Google Authenticator app device.</p>
+        <input type="text" id="auth-code-input" placeholder="000000" maxlength="6">
+        <button style="width:100%;" onclick="attemptSecureLoginGateSession()">Authenticate Session</button>
+    </div>
+
+    <!-- 📊 CORE CONTROL TELEMETRY DASHBOARD PANEL -->
+    <div id="admin-core-view" class="wrapper">
+        <h1 style="margin-bottom:24px;">⚓ System Dashboard Tower Management</h1>
+        <div class="grid">
+            <div class="card"><h3>Active Users Now</h3><div id="stat-active" class="metric">0</div></div>
+            <div class="card"><h3>Paid Pro Accounts</h3><div id="stat-pro" class="metric">0</div></div>
+            <div class="card"><h3>Gross Revenue</h3><div id="stat-revenue" class="metric" style="color:#4ADE80;">$0</div></div>
+        </div>
+
+        <h2 style="margin-bottom:14px;">👥 Registered System Handshakes & Privilege Controls</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>User Identifier Key ID</th>
+                    <th>Account Tier</th>
+                    <th>Last Check-In Timestamp</th>
+                    <th>Command Actions</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let verifiedSessionTokenCode = "";
+
+        async function attemptSecureLoginGateSession() {
+            const codeInput = document.getElementById('auth-code-input').value;
+
+            try {
+                const res = await fetch('/api/v1/admin/verify-login', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ tokenCode: codeInput })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    verifiedSessionTokenCode = codeInput;
+                    document.getElementById('login-gate').style.display = 'none';
+                    document.getElementById('admin-core-view').style.display = 'block';
+                    document.body.style.display = "block"; 
+                    fetchLiveDashboardMetrics();
+                    setInterval(fetchLiveDashboardMetrics, 20000); // Continuous 20-second tracking updates
+                } else {
+                    alert("Authentication rejected: Code mismatch error sequence.");
+                }
+            } catch (err) {
+                alert("Error reaching login verification endpoint service paths.");
+            }
+        }
+
+        async function fetchLiveDashboardMetrics() {
+            try {
+                const response = await fetch('/api/v1/admin/dashboard-stats', {
+                    headers: { "x-admin-token": verifiedSessionTokenCode }
+                });
+                if(!response.ok) throw new Error();
+                const data = await response.json();
+
+                document.getElementById('stat-active').innerText = data.activeUsersNow;
+                document.getElementById('stat-pro').innerText = data.proUsersCount;
+                document.getElementById('stat-revenue').innerText = "$" + data.totalRevenue;
+
+                const tbody = document.getElementById('table-body');
+                tbody.innerHTML = "";
+
+                data.proCustomersList.forEach(user => {
+                    const actionBtn = user.is_pro_user 
+                        ? `<button class="action-btn revoke-btn" onclick="toggleUserPro('${user.user_id}', false)">Revoke PRO</button>`
+                        : `<button class="action-btn grant-btn" onclick="toggleUserPro('${user.user_id}', true)">Grant PRO</button>`;
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="font-weight:bold; color:white;">🔑 ${user.user_id}</td>
+                        <td>${user.is_pro_user ? '<span style="color:#38BDF8; font-weight:bold;">⭐ PRO</span>' : '<span style="color:#94A3B8;">FREE</span>'}</td>
+                        <td>${new Date(user.last_seen_online).toLocaleString()}</td>
+                        <td>${actionBtn}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (err) {
+                document.getElementById('login-gate').style.display = 'block';
+                document.getElementById('admin-core-view').style.display = 'none';
+            }
+        }
+
+        async function toggleUserPro(uid, makePro) {
+            try {
+                const res = await fetch('/api/v1/admin/toggle-pro', {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "x-admin-token": verifiedSessionTokenCode
+                    },
+                    body: JSON.stringify({ targetUserId: uid, makePro: makePro })
+                });
+                if(res.ok) { fetchLiveDashboardMetrics(); }
+            } catch (e) { alert("Operation command execution aborted."); }
+        }
+    </script>
+</body>
+</html>
