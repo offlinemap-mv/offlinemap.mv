@@ -5,28 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ghost Maps Pro - Navigation Dashboard</title>
     
-    <!-- 1. LEAFLET CSS STYLESHEETS (Must load first to avoid invisible map graphics) -->
-    <link rel="stylesheet" href="https://unpkg.com" crossorigin="" />
+    <!-- 1. HIGH-SPEED LEAFLET ARCHITECTURE CSS STYLE SYSTEM (Loads first to prevent broken invisible maps) -->
+    <link rel="stylesheet" href="https://cloudflare.com" integrity="sha512-Zcn6xFREG0W74Z1zZ8bXzV8vQe4J88kZ+OQO5S3S6p0H/J9G7r5C2hA8zWw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <style>
-        /* BASE MATRIX STRUCTURAL FIXES */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-        body, html { width: 100% !important; height: 100% !important; overflow: hidden; background: #0b0f19; }
+        /* ABSOLUTE CANVAS VIEWPORT MATRIX OVERRIDES */
+        html, body { width: 100% !important; height: 100% !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; background-color: #0b0f19 !important; }
         
-        /* THE FULLSCREEN MAP CONTAINER GRID BOX */
+        /* INDEPENDENT DIMENSIONAL MAPPING BOX GRID WINDOW */
         #map { 
             position: absolute !important; 
             top: 0 !important; 
             bottom: 0 !important; 
             left: 0 !important; 
             right: 0 !important; 
-            width: 100% !important; 
-            height: 100% !important; 
+            width: 100vw !important; 
+            height: 100vh !important; 
             background: #0b0f19 !important; 
             z-index: 1; 
         }
 
-        /* PREMIUM CONTROLS FLOATING INTERFACES */
+        /* PREMIUM CONTROLS FLOATING DASHBOARD LAYER PANEL CARDS */
         .floating-card {
             position: absolute;
             background: rgba(16, 22, 37, 0.95);
@@ -41,7 +40,7 @@
 
         .top-right-controls { top: 20px; right: 20px; width: 240px; }
         .bottom-telemetry { bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; display: flex; justify-content: space-around; text-align: center; }
-        .top-left-gear { top: 20px; left: 60px; }
+        .top-left-gear { top: 20px; left: 20px; }
 
         .card-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 6px; }
         
@@ -81,15 +80,15 @@
 </head>
 <body>
 
-    <!-- MAP ENGINE DISPLAY TARGET CANVAS -->
+    <!-- MAP VISUAL LAYOUT CORE PORT CONTAINER CANVAS -->
     <div id="map"></div>
 
-    <!-- UPPER LEFT CONFIGURATION CONTROLLER BUTTON -->
+    <!-- UPPER LEFT DATA FLUSH ENGINE HANDLER TRIGGER BUTTON -->
     <div class="floating-card top-left-gear">
         <button onclick="triggerVaporizeSync()" style="background:none; border:none; font-size:1.3rem; cursor:pointer;">⚙️</button>
     </div>
 
-    <!-- UPPER RIGHT LAYOUT LAYER SELECTION MARKETPLACE -->
+    <!-- UPPER RIGHT LAYOUT LAYER SELECTION MENU & DOWNLOAD SYSTEM -->
     <div class="floating-card top-right-controls">
         <div class="card-label">Map Views</div>
         <select id="map-view-selector" onchange="handleLayerSwitch(this.value)">
@@ -100,7 +99,7 @@
         <button class="btn-action" onclick="alert('Region cache queued! Map data download initialized for offline standby mode.')">📥 Save Region</button>
     </div>
 
-    <!-- BOTTOM REAL-TIME TELEMETRY SENSOR GRID PANEL -->
+    <!-- BOTTOM INSTRUMENT PANEL FOR REAL-TIME SIMULATED SENSOR DATA -->
     <div class="floating-card bottom-telemetry">
         <div class="telemetry-item">
             <span class="card-label">Speed</span>
@@ -116,9 +115,10 @@
         </div>
     </div>
 
-    <!-- 2. LEAFLET SCRIPT RUNNER CORE (Must load BEFORE app.js code parses) -->
-    <script src="https://unpkg.com" crossorigin=""></script>
-    <!-- 3. CUSTOM CORE MAP SCRIPT CHANNELS -->
+    <!-- 2. LEAFLET RUNTIME ENGINE JAVASCRIPT CORES (Compiles before running your local application script) -->
+    <script src="https://cloudflare.com" integrity="sha512-Bw3bTAs4XwYl9wX8+b3w24w6Xm+S8N3C0WbH+uO1mQ2oF94fFw/D5uO7N5yN/X30YwM6P6K482U5F7N8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <!-- 3. MAIN COMPUTATION FUNCTION PIPELINE LINKS -->
     <script src="app.js"></script>
 </body>
 </html>
