@@ -4,10 +4,9 @@
  */
 
 // 1. GLOBAL SYSTEM CONFIGURATIONS
-// Change this to match your live Render service url when syncing data nodes!
 const BACKEND_URL = "https://onrender.com";
 
-// Paste your actual unique Stripe product checkout link strings inside these quotes!
+// Stripe Payment Gateway links for your $1.99 user monetizations
 const STRIPE_LINKS = {
     topo: "https://stripe.com",
     marine: "https://stripe.com"
@@ -18,7 +17,7 @@ let map;
 const mapLayers = {};
 let currentLayerType = 'road';
 
-// SECURE HTTPS TILE PROVIDERS (Fixes the black background graphic bug!)
+// SECURE HTTPS MAP GRAPHIC SOURCES
 const tileProviders = {
     road: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     topo: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
@@ -26,7 +25,6 @@ const tileProviders = {
 };
 
 // PERSISTENT LOCK CONTROLLER
-// Tracks user payment status locally in the browser's persistent cache structure
 let purchasedLayers = {
     road: true,      // Free Base Map view
     topo: false,     // Premium Layer: Locks behind $1.99 paywall
@@ -37,7 +35,7 @@ let purchasedLayers = {
 function initMapApp() {
     console.log("Initializing secure offline map engine...");
 
-    // Build the default Leaflet canvas viewport (Centered over London coordinate space)
+    // Build map workspace container parameters safely
     map = L.map('map', { zoomControl: false }).setView([51.505, -0.09], 13);
     L.control.zoom({ position: 'topleft' }).addTo(map);
 
@@ -45,7 +43,7 @@ function initMapApp() {
     mapLayers.road = L.tileLayer(tileProviders.road, {
         maxZoom: 19,
         attribution: '© OpenStreetMap contributors'
-    }).addTo(map); // Default free base layer
+    }).addTo(map); // Default free baseline layer
 
     mapLayers.topo = L.tileLayer(tileProviders.topo, {
         maxZoom: 17,
@@ -57,25 +55,25 @@ function initMapApp() {
         attribution: '© OpenSeaMap'
     });
 
-    // Check local storage memory to see if they previously unlocked premium layers
-    restoreLocalPurchases();
+    // CRITICAL ENGINE RE-RENDER TRIGGER (Fixes the blank black map screen bug instantly!)
+    setTimeout(() => {
+        map.invalidateSize();
+        console.log("Map graphic render size parameters recalculated successfully.");
+    }, 400);
 
-    // Fire hardware state listeners
+    restoreLocalPurchases();
     setupConnectivityListeners();
     registerOfflineServiceWorker();
     startMockTelemetryEngine();
 }
 
 // 4. THE INTEGRATED $1.99 PAYWALL INTERCEPTOR
-// This function tracks dropdown selections and intercepts unpaid premium requests
 function handleLayerSwitch(selectedLayerKey) {
     console.log(`User requested layer transition to: ${selectedLayerKey}`);
 
-    // Clean user parameter inputs to match keys
-    const lowerKey = selectedLayerKey.toLowerCase();
-    const targetKey = lowerKey.includes('marine') ? 'marine' : lowerKey.includes('topo') ? 'topo' : 'road';
+    const targetKey = selectedLayerKey.toLowerCase();
 
-    // Intercept flow if the selected map tier is premium and unpaid
+    // Intercept navigation stream if the selected map tier is premium and unpaid
     if ((targetKey === 'topo' || targetKey === 'marine') && !purchasedLayers[targetKey]) {
         const confirmCheckout = confirm(`The ${targetKey.toUpperCase()} View is a premium layout feature.\n\nUnlock it forever with a one-time validation fee of $1.99?`);
         
@@ -84,16 +82,14 @@ function handleLayerSwitch(selectedLayerKey) {
             window.location.href = STRIPE_LINKS[targetKey];
         }
         
-        // Reset user choice selector interface back to the current active layer
         resetDropdownInterfaceUI();
         return;
     }
 
-    // Process layer rendering change if purchase validation is cleared
+    // Process layer transition if purchase check passes
     switchLayer(targetKey);
 }
 
-// Low-level map switching mechanism
 function switchLayer(layerKey) {
     Object.keys(mapLayers).forEach(key => {
         if (map.hasLayer(mapLayers[key])) {
@@ -114,14 +110,12 @@ function switchLayer(layerKey) {
 
 // 5. DATA WIPE SECURITY CONTROLLER
 async function triggerVaporizeSync() {
-    console.warn("Initializing security wipe parameters across local and cloud environments...");
-    
+    console.warn("Initializing security wipe parameters...");
     try {
         const response = await fetch(`${BACKEND_URL}/api/v1/sync/fetch-and-wipe`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
-        
         if (response.ok) {
             alert("Security Handshake Complete: Cloud storage node completely vaporized.");
         } else {
@@ -135,15 +129,14 @@ async function triggerVaporizeSync() {
 // 6. UTILITY ARCHITECTURE CHANNELS
 function setupConnectivityListeners() {
     const updateNetworkUI = () => {
-        const badge = document.getElementById('network-status') || { style: {} };
+        const badge = document.getElementById('network-status');
+        if (!badge) return;
         if (navigator.onLine) {
-            console.log("Device network link state: ONLINE");
-            badge.innerText = "ONLINE MODE";
-            badge.style.background = "#00e676";
+            badge.innerText = "● Online";
+            badge.style.color = "#10b981";
         } else {
-            console.log("Device network link state: 100% OFFLINE");
-            badge.innerText = "100% OFFLINE MAP RUNNING";
-            badge.style.background = "#ff1744";
+            badge.innerText = "● 100% Offline Map Running";
+            badge.style.color = "#ef4444";
         }
     };
     window.addEventListener('online', updateNetworkUI);
@@ -154,8 +147,8 @@ function setupConnectivityListeners() {
 function registerOfflineServiceWorker() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('ServiceWorker engine listening over scope:', reg.scope))
-            .catch(err => console.error('Offline installation stalled:', err));
+            .then(reg => console.log('ServiceWorker engine active over scope:', reg.scope))
+            .catch(err => console.error('Offline worker failed:', err));
     }
 }
 
@@ -184,5 +177,5 @@ function resetDropdownInterfaceUI() {
     if (selector) selector.value = currentLayerType;
 }
 
-// Initialize application initialization loop on download complete
+// Fire application initialization loop on window download
 window.onload = initMapApp;
